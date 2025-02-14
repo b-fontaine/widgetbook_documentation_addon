@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -101,7 +100,7 @@ class DocumentationAddon extends WidgetbookAddon<bool> {
   Future<String> loadMarkdown() async {
     try {
       return await rootBundle.loadString(
-        "${kDebugMode ? "" : "assets/"}markdown/${Uri.base.queryParameters['path']}.md",
+        "markdown/${Uri.base.queryParameters['path']}.md",
       );
     } catch (_) {
       return "";
