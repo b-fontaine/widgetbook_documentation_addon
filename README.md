@@ -75,3 +75,17 @@ Widget buildPercentTextDynamicInputUseCase(BuildContext context) {
   return Percent();
 }
 ```
+
+## Add automatically your assets on pubspec.yaml
+
+You can use `asset_manager_cli` ([pub.dev link](https://pub.dev/packages/asset_manager_cli))
+
+### Install
+```shell
+dart pub global activate asset_manager_cli
+```
+
+### Using
+```shell
+asset_manager add
+```

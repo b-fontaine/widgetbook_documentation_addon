@@ -1,6 +1,6 @@
 name: widgetbook_documentation_addon
 description: "An addon that displays documentation for the widget."
-version: 1.0.1+1
+version: 1.0.1+2
 homepage: https://github.com/b-fontaine/widgetbook_documentation_addon
 
 environment:

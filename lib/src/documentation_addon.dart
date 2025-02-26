@@ -42,7 +42,7 @@ class DocumentationAddon extends WidgetbookAddon<bool> {
   @override
   Widget buildUseCase(BuildContext context, Widget child, bool setting) {
     if (!setting) {
-      return child.animate().fade();
+      return SingleChildScrollView(child: child.animate().fade());
     }
     final backgroundColor =
         (Theme.of(context).brightness == Brightness.light)
