@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_highlighter/flutter_highlighter.dart';
 import 'package:flutter_highlighter/themes/atom-one-dark.dart';
@@ -11,6 +10,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:widgetbook/widgetbook.dart';
+import 'package:widgetbook_annotation/widgetbook_annotation.dart'
+    show AddonConfig;
+
+/// [AddonConfig] for the DocumentationAddon.
+class DocumentationAddonConfig extends AddonConfig {
+  const DocumentationAddonConfig(bool active)
+    : super('documentation', 'documentation:$active');
+}
 
 /// An addon that displays documentation for the widget.
 ///
@@ -25,23 +32,21 @@ import 'package:widgetbook/widgetbook.dart';
 ///
 /// The documentation can be toggled on and off using the `documentation` field.
 class DocumentationAddon extends WidgetbookAddon<bool> {
-  DocumentationAddon({
-    this.initialBool = true,
-  }) : super(name: 'Documentation');
+  final AssetBundle assetBundle;
+
+  DocumentationAddon({required this.assetBundle, this.initialBool = true})
+    : super(name: 'Documentation');
   final bool initialBool;
 
   @override
-  Widget buildUseCase(
-    BuildContext context,
-    Widget child,
-    bool setting,
-  ) {
+  Widget buildUseCase(BuildContext context, Widget child, bool setting) {
     if (!setting) {
       return child.animate().fade();
     }
-    final backgroundColor = (Theme.of(context).brightness == Brightness.light)
-        ? Color(0xFFFDFCFF)
-        : Color(0xFF1A1C1E);
+    final backgroundColor =
+        (Theme.of(context).brightness == Brightness.light)
+            ? Color(0xFFFDFCFF)
+            : Color(0xFF1A1C1E);
     return FutureBuilder(
       future: loadMarkdown(),
       builder: (context, snapshot) {
@@ -73,18 +78,19 @@ class DocumentationAddon extends WidgetbookAddon<bool> {
                 ),
               ),
               ResizableChild(
-                child: (snapshot.hasData)
-                    ? Card(
-                        color: backgroundColor,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: MarkdownWithHighlight(
-                                  markdown: snapshot.data ?? "")
-                              .animate()
-                              .fade(),
-                        ),
-                      )
-                    : SizedBox(),
+                child:
+                    (snapshot.hasData)
+                        ? Card(
+                          color: backgroundColor,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child:
+                                MarkdownWithHighlight(
+                                  markdown: snapshot.data ?? "",
+                                ).animate().fade(),
+                          ),
+                        )
+                        : SizedBox(),
               ),
             ],
           ).animate().fade();
@@ -99,7 +105,7 @@ class DocumentationAddon extends WidgetbookAddon<bool> {
 
   Future<String> loadMarkdown() async {
     try {
-      return await rootBundle.loadString(
+      return await assetBundle.loadString(
         "markdown/${Uri.base.queryParameters['path']}.md",
       );
     } catch (_) {
@@ -109,12 +115,7 @@ class DocumentationAddon extends WidgetbookAddon<bool> {
 
   @override
   List<Field<bool>> get fields {
-    return [
-      BooleanField(
-        name: 'documentation',
-        initialValue: initialBool,
-      ),
-    ];
+    return [BooleanField(name: 'documentation', initialValue: initialBool)];
   }
 
   @override
@@ -124,10 +125,7 @@ class DocumentationAddon extends WidgetbookAddon<bool> {
 }
 
 class MarkdownWithHighlight extends StatelessWidget {
-  const MarkdownWithHighlight({
-    super.key,
-    required this.markdown,
-  });
+  const MarkdownWithHighlight({super.key, required this.markdown});
   final String markdown;
 
   @override
@@ -136,9 +134,7 @@ class MarkdownWithHighlight extends StatelessWidget {
     return Markdown(
       shrinkWrap: true,
       data: markdown,
-      builders: {
-        'code': _CodeElementBuilder(),
-      },
+      builders: {'code': _CodeElementBuilder()},
       styleSheet: MarkdownStyleSheet(
         p: theme.bodySmall,
         strong: theme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
@@ -163,9 +159,7 @@ class MarkdownWithHighlight extends StatelessWidget {
       ),
       onTapLink: (text, url, title) {
         if (url != null) {
-          launchUrl(
-            Uri.parse(url),
-          );
+          launchUrl(Uri.parse(url));
         }
       },
       selectable: true,
@@ -185,12 +179,13 @@ class _CodeElementBuilder extends MarkdownElementBuilder {
     return HighlightView(
       element.textContent,
       language: language,
-      theme: MediaQueryData.fromView(
-                      RendererBinding.instance.renderViews.first.flutterView)
-                  .platformBrightness ==
-              Brightness.light
-          ? atomOneLightTheme
-          : atomOneDarkTheme,
+      theme:
+          MediaQueryData.fromView(
+                    RendererBinding.instance.renderViews.first.flutterView,
+                  ).platformBrightness ==
+                  Brightness.light
+              ? atomOneLightTheme
+              : atomOneDarkTheme,
       padding: const EdgeInsets.all(8.0),
       textStyle: preferredStyle ?? GoogleFonts.robotoMono(),
     );
